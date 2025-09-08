@@ -1,13 +1,13 @@
 # %%
 import struct
-from pathlib import Path
-from numpy.typing import ArrayLike
 from datetime import datetime
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+from numpy.typing import ArrayLike
 
 from srdatacombiner.helper_scripts import xarray_tools
 from srdatacombiner.sensors.sensors import Sensors
@@ -16,8 +16,7 @@ plt.style.use("seaborn-v0_8-whitegrid")
 
 
 class Taltech(Sensors):
-    def __init__(self, filename: str) -> None:
-
+    def __init__(self, filename: str, resample_rate: int = None) -> None:
         self.filename = Path(filename)
         self.fmt: str
         self.fs: int
@@ -25,7 +24,7 @@ class Taltech(Sensors):
         self.column_names_raw: list
         self.column_names_selected: list
 
-        super().__init__(filename)
+        super().__init__(filename, resample_rate=resample_rate)
         self.infolist: list[str] = ["Unit", "Range", "Sensor"]
         self.col_rename_dict = {}
 
@@ -58,12 +57,12 @@ class Taltech(Sensors):
 
 
 class BDS(Taltech):
-    def __init__(self, filename: str) -> None:
+    def __init__(self, filename: str, resample_rate: int = None) -> None:
         self.fmt: str
         self.fs: int
         self.column_names_raw: list[str]
 
-        super().__init__(filename)
+        super().__init__(filename, resample_rate=resample_rate)
         self.units_dict = {
             "time": "s",
             "p": ("mBar", "+/- 2000", "TE Connectivity MS5837-2BA"),
@@ -109,11 +108,14 @@ class BDS(Taltech):
 
 
 class BDS100(BDS):
-    def __init__(self, filename: str, **kwargs) -> None:
+    sample_rate: int = 100
+    filename_extension: str = ".txt"
+
+    def __init__(self, filename: str, resample_rate: int = None) -> None:
         """
         This class processes BDS measurements at 100 Hz.
         """
-        super().__init__(filename)
+        super().__init__(filename, resample_rate=resample_rate)
         self.fmt = "HI22f4B"  # format string to set byteorder
         self.fs = 100
         self.column_names_raw = [
@@ -196,11 +198,14 @@ class BDS100(BDS):
 
 
 class BDS250(BDS):
-    def __init__(self, filename: str) -> None:
+    sample_rate: int = 250
+    filename_extension: str = ".txt"
+
+    def __init__(self, filename: str, resample_rate: int = None) -> None:
         """
         This class processes BDS measurements at 250 Hz.
         """
-        super().__init__(filename)
+        super().__init__(filename, resample_rate=resample_rate)
         self.fmt = "HI12f4B"
         self.fs = 250
         self.column_names_raw = [
@@ -251,10 +256,11 @@ class RAPID(Taltech):
     def load_calibration(self) -> pd.DataFrame:
         df = pd.DataFrame()
         for file in Path(self.calibration_folder).glob("*.txt"):
-            df_temp = pd.read_csv(
+            df_tmp = pd.read_csv(
                 str(file), sep=" =", header=None, index_col=0, engine="python"
             ).T
-            df = pd.concat([df, df_temp])
+            df_tmp *= 9.81  # convert g to m/s^2
+            df = pd.concat([df, df_tmp])
         df.reset_index(drop=True)
         return df
 
@@ -265,15 +271,15 @@ class RAPID(Taltech):
         data.iloc[1::2] -= offset_odd
         return data
 
-    def calibrate_accel(self, data: pd.DataFrame, calib_mean: pd.DataFrame) -> None:
+    def calibrate_accel(self, data: pd.DataFrame, calib_avg: pd.DataFrame) -> None:
         data["accx"] = self._calibration_fct(
-            data["accx"], calib_mean["oX"], calib_mean["eX"]
+            data["accx"], calib_avg["oX"], calib_avg["eX"]
         )
         data["accy"] = self._calibration_fct(
-            data["accy"], calib_mean["oY"], calib_mean["eY"]
+            data["accy"], calib_avg["oY"], calib_avg["eY"]
         )
         data["accz"] = self._calibration_fct(
-            data["accz"], calib_mean["oZ"], calib_mean["eZ"]
+            data["accz"], calib_avg["oZ"], calib_avg["eZ"]
         )
         return data
 
@@ -283,7 +289,7 @@ class RAPID(Taltech):
     def post_process(self, df: pd.DataFrame) -> pd.DataFrame:
         if self.calibration_folder is not None:
             calib_df = self.load_calibration()
-            df = self.calibrate_accel(df, calib_mean=calib_df.median())
+            df = self.calibrate_accel(df, calib_avg=calib_df.median())
         df = self.apply_gain(df)
         df["time"] = self._create_timestamps_from_fs(df)
         df["accmag"] = self.calculate_acc_mag(df)
@@ -293,6 +299,9 @@ class RAPID(Taltech):
 
 
 class RAPIDv1(RAPID):
+    sample_rate: int = 2048
+    filename_extension: str = ".txt"
+
     def __init__(
         self,
         filename: str,
@@ -324,6 +333,9 @@ class RAPIDv1(RAPID):
 
 
 class RAPIDv3_IMP(RAPID):
+    sample_rate: int = 2000
+    filename_extension: str = ".IMP"
+
     def __init__(
         self,
         filename: str,
@@ -392,13 +404,15 @@ class RAPIDv3_IMP(RAPID):
 
 
 class RAPIDv3_HIG(RAPID):
+    sample_rate: int = 2000
+    filename_extension: str = ".HIG"
+
     def __init__(
         self,
         filename: str,
         calibration_folder: str = None,
     ) -> None:
         super().__init__(filename, calibration_folder)
-        self.fs = 2000
         self.fmt = ">I3hx"
         self.gain_list = [
             1,
@@ -443,7 +457,10 @@ class RAPIDv3:
         return ds
 
 
-class Backpack(Sensors):
+class Microtag(Sensors):
+    sample_rate: int = 100
+    filename_extension: str = ".txt"
+
     def __init__(self, filename) -> None:
         super().__init__(filename)
         self.column_names = [
@@ -491,8 +508,8 @@ class Backpack(Sensors):
 if __name__ == "__main__":
     import plotly.express as px
 
-    filename = "/home/iring/Projects/bds_data_assimilation/srdatacombiner/data/24_08_08_EDF_9.5mmBlade_1mpsSteps_1to10.3mps_30N/10ms/11/31_T041128124125.txt"  # your filename here
-    self = RAPIDv1(filename=filename)
+    filename = ""  # your filename here
+    self = Microtag(filename=filename)
     self.get_xarray()
     df = self.get_df()
     ds = self.get_xarray()

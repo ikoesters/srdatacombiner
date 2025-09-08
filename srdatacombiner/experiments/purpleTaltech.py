@@ -6,8 +6,8 @@ import numpy as np
 import xarray as xr
 
 from srdatacombiner.experiments.experiments import Experiments
-from srdatacombiner.sensors.serialplot import Serialplot_PurpleTaltech
 from srdatacombiner.sensors.kollmorgen import Kollmorgen
+from srdatacombiner.sensors.serialplot import Serialplot_Stickfish
 
 
 class PurpleTaltech(Experiments):
@@ -17,10 +17,7 @@ class PurpleTaltech(Experiments):
         )
         self.t_measurement = 0.4  # s
         self.crop_coord = "time"
-        self.coord_names = {
-            "strvel": self.get_folder_coord_from_path,
-            "trial": self.get_file_coord_from_path,
-        }
+
         self.sensors = {
             "sensorprobe": Sensorprobe(self),
             "servoscope": Scope(self),
@@ -30,6 +27,10 @@ class PurpleTaltech(Experiments):
             "sensorprobe",
         )
         super().__init__()
+        self.coord_names = {
+            "strvel": self.get_folder_coord_from_path,
+            "trial": self.get_file_coord_from_path,
+        }
 
     def get_folder_coord_from_path(self, path: Path) -> float:
         return float(path.parts[-2][:-2])  # cut off the "ms" at the end
@@ -41,7 +42,7 @@ class PurpleTaltech(Experiments):
 class Sensorprobe:
     def __init__(self, config: Experiments) -> None:
         self.config = config
-        self.processor = Serialplot_PurpleTaltech
+        self.processor = Serialplot_Stickfish
         self.sensor_kwargs = {}
         self.file_glob = "probe*"
 
@@ -92,7 +93,7 @@ if __name__ == "__main__":
     from srdatacombiner.combineFiles import CombineFiles
     from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 
-    comb = CombineFiles(PurpleTaltech)
+    comb = CombineFiles(PurpleTaltech())
     folderlist = comb.folderlist_from_datafolder()
     ds = comb.combine_datasets_from_paths(folderlist)
     # %%

@@ -1,13 +1,13 @@
 # %%
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+import numpy as np
 import xarray as xr
 
 from srdatacombiner.experiments.experiments import Experiments
-from srdatacombiner.sensors.labjack import Labjack_ovguFish
 from srdatacombiner.sensors.kollmorgen import Kollmorgen
-import matplotlib.pyplot as plt
-import numpy as np
+from srdatacombiner.sensors.labjack import Labjack_ovguFish
 
 plt.style.use("seaborn-v0_8-whitegrid")
 
@@ -19,10 +19,6 @@ class PurpleSausage(Experiments):
         )
         self.t_measurement = 1.5  # s
         self.crop_coord = "time"
-        self.coord_names = {
-            "strvel": self.get_folder_coord_from_path,
-            "trial": self.get_file_coord_from_path,
-        }
 
         self.sensors = {
             "sensorprobe": Sensorprobe(self),
@@ -33,6 +29,10 @@ class PurpleSausage(Experiments):
             "sensorprobe",
         )
         super().__init__()
+        self.coord_names = {
+            "strvel": self.get_folder_coord_from_path,
+            "trial": self.get_file_coord_from_path,
+        }
 
     def get_folder_coord_from_path(self, path: Path) -> float:
         return float(path.parts[-2][:-2])  # cut off the "ms" at the end
@@ -90,11 +90,12 @@ class Scope:
 
 # %%
 if __name__ == "__main__":
-    from srdatacombiner.combineFiles import CombineFiles
-    from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
     import plotly.express as px
 
-    comb = CombineFiles(PurpleSausage)
+    from srdatacombiner.combineFiles import CombineFiles
+    from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
+
+    comb = CombineFiles(PurpleSausage())
     folderlist = comb.folderlist_from_datafolder()
     ds = comb.combine_datasets_from_paths(folderlist)
     # %% Sensor was flipped in the wrong orientation for some trials

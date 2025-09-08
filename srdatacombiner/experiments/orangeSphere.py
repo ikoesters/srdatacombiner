@@ -6,8 +6,8 @@ import numpy as np
 import xarray as xr
 
 from srdatacombiner.experiments.experiments import Experiments
-from srdatacombiner.sensors.taltech import Backpack
 from srdatacombiner.sensors.kollmorgen import Kollmorgen
+from srdatacombiner.sensors.taltech import Microtag
 
 
 class UNSW_Strikes(Experiments):
@@ -17,10 +17,7 @@ class UNSW_Strikes(Experiments):
         )
         self.t_measurement = 0.5  # s
         self.crop_coord = "time"
-        self.coord_names = {
-            "strvel": self.get_folder_coord_from_path,
-            "trial": self.get_file_coord_from_path,
-        }
+
         self.sensors = {
             "sensorprobe": Sensorprobe(self),
             "servoscope": Scope(self),
@@ -30,6 +27,10 @@ class UNSW_Strikes(Experiments):
             "sensorprobe",
         )
         super().__init__()
+        self.coord_names = {
+            "strvel": self.get_folder_coord_from_path,
+            "trial": self.get_file_coord_from_path,
+        }
 
     def get_folder_coord_from_path(self, path: Path) -> float:
         return float(path.parts[-2][:-2])  # cut off the "ms" at the end
@@ -41,7 +42,7 @@ class UNSW_Strikes(Experiments):
 class Sensorprobe:
     def __init__(self, config: Experiments) -> None:
         self.config = config
-        self.processor = Backpack
+        self.processor = Microtag
         self.sensor_kwargs = {}
         self.file_glob = "*.txt"
 
@@ -92,10 +93,10 @@ if __name__ == "__main__":
     from srdatacombiner.combineFiles import CombineFiles
     from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 
-    comb = CombineFiles(UNSW_Strikes)
+    comb = CombineFiles(UNSW_Strikes())
     folderlist = comb.folderlist_from_datafolder()
     ds = comb.combine_datasets_from_paths(folderlist)
     # %%
-    save_as_h5(ds, "../../data/combined_data", comb.datafolder.name)
+    # save_as_h5(ds, "../../data/combined_data", comb.datafolder.name)
 
 # %%

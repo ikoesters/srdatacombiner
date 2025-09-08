@@ -1,10 +1,12 @@
 # %%
-import pandas as pd
-import numpy as np
-import xarray as xr
-from pathlib import Path
-from srdatacombiner.helper_scripts import xarray_tools
 from abc import ABC, abstractmethod
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import xarray as xr
+
+from srdatacombiner.helper_scripts import xarray_tools
 
 # %%
 
@@ -13,8 +15,10 @@ class Sensors(ABC):
     def __init__(
         self,
         filename: str | Path,
+        resample_rate: int = None,
     ) -> None:
         self.filename = Path(filename)
+        self.resample_rate: int = resample_rate  # Hz
 
         self.units_dict: dict
         self.infolist: list[str]
@@ -42,6 +46,10 @@ class Sensors(ABC):
     def get_xarray(self) -> xr.Dataset:
         df = self.get_df()
         ds = xarray_tools.df2ds(df)
+        if hasattr(self, "resample_rate") and self.resample_rate is not None:
+            ds = ds.interp(
+                time=np.arange(ds.time[0], ds.time[-1], 1 / self.resample_rate)
+            )
         if hasattr(self, "coords"):
             ds = ds.assign_coords(self.coords)
         if hasattr(self, "units_dict") and hasattr(self, "infolist"):

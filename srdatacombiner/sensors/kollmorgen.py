@@ -1,13 +1,17 @@
 # %%
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import xarray as xr
-from pathlib import Path
-from srdatacombiner.sensors.sensors import Sensors
+
 from srdatacombiner.helper_scripts import xarray_tools
+from srdatacombiner.sensors.sensors import Sensors
 
 
 class Kollmorgen(Sensors):
+    filename_extension: str = ".csv"
+
     def __init__(
         self,
         filename: str | Path,
@@ -42,6 +46,8 @@ class Kollmorgen(Sensors):
             "IL.FB - [Axis1] Current feedback(IL.FB - [Axis1] Current feedback)[Arms]": "curr",
             "DOUT1.STATE(Digital output 1 state)[-]": "dout1",
             "DOUT1.STATE - Digital output 1 state(DOUT1.STATE - Digital output 1 state)[-]": "dout1",
+            "DOUT2.STATE(Digital output 2 state)[-]": "dout2",
+            "DOUT2.STATE - Digital output 2 state(DOUT2.STATE - Digital output 2 state)[-]": "dout2",
             "VBUS.VALUE - Bus voltage(VBUS.VALUE - Bus voltage)[Vdc]": "vbus",
         }
 

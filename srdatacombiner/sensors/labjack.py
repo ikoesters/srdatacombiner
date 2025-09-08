@@ -9,6 +9,8 @@ from srdatacombiner.sensors.sensors import Sensors
 
 
 class Labjack(Sensors):
+    filename_extension: str = ".dat"
+
     def __init__(self, filename) -> None:
         self.usecols: list[int]
         super().__init__(filename)
@@ -29,6 +31,8 @@ class Labjack(Sensors):
 
 
 class Labjack_ovguFish(Labjack):
+    sample_rate: int = 8000
+
     def __init__(self, filename: str | Path) -> None:
         self.usecols = [0, 1, 2, 3]
         self.col_rename_dict = {

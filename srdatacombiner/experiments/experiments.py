@@ -1,7 +1,7 @@
 # %%
-# get_xarray soll get_ind_xarray aufrufen
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
+from typing import Any, Callable
 
 import numpy as np
 import xarray as xr
@@ -12,15 +12,16 @@ from srdatacombiner.sensors.sensors import Sensors
 
 
 class Experiments(ABC):
-
     def __init__(self) -> None:
-
         # self.file_globs: dict[str, str]
         self.datafolder: str | Path
-        self.sensors: dict[str, Sensors]
+        self.sensors: dict[str, Any]
         self.interpolation_master_args: tuple(Sensors, str | Path)
         self.crop_idcs: tuple[int]
         self.crop_coord: str
+        self.coord_names = dict[
+            str, Callable
+        ]  # Maps coordinate names to functions that extract the coordinate from a path
         self.t_measurement: int
 
         self.interpolation_master = self.get_xarray(*self.interpolation_master_args)
@@ -55,10 +56,14 @@ class Experiments(ABC):
             filename=filename, **sensor_settings.sensor_kwargs
         )
         ds = sensor.get_xarray()
-        crop_idcs = sensor_settings.get_crop_idcs(ds)
+
         if hasattr(self, "crop_coord"):
-            ds = self.isel_crop_ds(ds, crop_idcs)
-            ds = self.reset_coord(ds, self.crop_coord)
+            crop_idcs = sensor_settings.get_crop_idcs(ds)
+            if crop_idcs[0] >= 0:
+                ds = self.isel_crop_ds(ds, crop_idcs)
+                ds = self.reset_coord(ds, self.crop_coord)
+            else:
+                ds = xr.full_like(ds, np.nan)
         if hasattr(self, "interpolation_master"):
             ds = ds.interp_like(self.interpolation_master)
         if hasattr(sensor_settings, "post_process"):
@@ -82,16 +87,3 @@ class Experiments(ABC):
                     )
                 )
         return ds_filtered
-
-
-class Settings(ABC):
-    def __init__(self, config: Experiments) -> None:
-        self.processor: Sensors
-        self.sensor_kwargs: dict
-        self.file_glob: str
-
-    def get_crop_idcs(self, ds: xr.Dataset) -> tuple[int]:
-        raise NotImplementedError("Must be implemented in subclass")
-
-
-# %%

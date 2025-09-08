@@ -1,6 +1,7 @@
 # %%
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import xarray as xr
 
@@ -9,10 +10,14 @@ from srdatacombiner.sensors.sensors import Sensors
 
 
 class UNSW:
+    sample_rate: int = 396
+    filename_extension: str = ".csv"
+
     def __init__(
         self,
         filename: str | Path,
         interpolate_method: str | Path = "linear",
+        resample_rate: int = None,
     ) -> None:
         self.filename = Path(filename)
 
@@ -22,6 +27,7 @@ class UNSW:
         self.filename_acc = next(self.filename.parent.glob(self.acc_file_glob))
 
         self.interpolate_method = interpolate_method
+        self.resample_rate = resample_rate
 
         self.pres_obj = UNSW_Pres(self.filename_pres)
         self.acc_obj = UNSW_Acc(self.filename_acc)
@@ -31,6 +37,12 @@ class UNSW:
         dsacc = self.acc_obj.get_xarray()
         dspres = dspres.interp_like(dsacc, method=self.interpolate_method)
         ds = xr.merge([dsacc, dspres])
+        ds = ds.drop_duplicates(dim="time")
+
+        if self.resample_rate is not None:
+            ds = ds.interp(
+                time=np.arange(ds.time[0], ds.time[-1], 1 / self.resample_rate)
+            )
         return ds
 
     def get_df(self) -> pd.DataFrame:
@@ -92,6 +104,8 @@ class UNSW_Acc(UNSW_Common):
 
     def post_process(self, df):
         df = super().post_process(df)
+
+        df = df.loc[:, ["accx", "accy", "accz"]] * 9.81
         df["accmag"] = (df["accx"] ** 2 + df["accy"] ** 2 + df["accz"] ** 2) ** 0.5
         return df
 
@@ -99,8 +113,11 @@ class UNSW_Acc(UNSW_Common):
 # %%
 if __name__ == "__main__":
     import plotly.express as px
+    from matplotlib import pyplot as plt
+
+    plt.style.use("seaborn-v0_8-whitegrid")
 
     filename = ""  # your filename here
-    self = UNSW(filename=filename)
+    self = UNSW(filename=filename, resample_rate=200)
     ds = self.get_xarray()
 # %%

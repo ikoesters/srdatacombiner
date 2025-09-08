@@ -1,6 +1,7 @@
 # %%
-from pathlib import Path
+import re
 import shutil
+from pathlib import Path
 
 
 def move_files_to_folders(foldername: str | Path, file_glob: str) -> None:
@@ -43,6 +44,3 @@ def move_files_to_folders(foldername: str | Path, file_glob: str) -> None:
         new_folder.mkdir(exist_ok=True)
 
         shutil.move(str(file), str(new_folder / file.name))
-
-
-# %%

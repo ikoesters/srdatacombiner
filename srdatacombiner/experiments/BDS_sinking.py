@@ -1,9 +1,8 @@
 # %%
 from pathlib import Path
 
-import xarray as xr
 import numpy as np
-
+import xarray as xr
 
 from srdatacombiner.experiments.experiments import Experiments
 from srdatacombiner.sensors.taltech import BDS250
@@ -14,9 +13,6 @@ class BDS_Sinking(Experiments):
         self.datafolder = "../../data/25_01_16_Sink_Experiment"
         self.t_measurement = 6  # s
         self.crop_coord = "time"
-        self.coord_names = {
-            "trial": self.get_file_coord_from_path,
-        }
 
         self.sensors = {"sensorprobe": Sensorprobe(self)}
         self.interpolation_master_args = (
@@ -24,6 +20,9 @@ class BDS_Sinking(Experiments):
             "sensorprobe",
         )
         super().__init__()
+        self.coord_names = {
+            "trial": self.get_file_coord_from_path,
+        }
 
     def get_file_coord_from_path(self, path: Path) -> float:
         return int(path.parts[-1])

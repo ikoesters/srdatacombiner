@@ -7,12 +7,11 @@ from srdatacombiner.experiments.experiments import Experiments
 
 
 class CombineFiles:
-
     def __init__(
         self,
         experiment_class: Experiments,
     ):
-        self.exp = experiment_class()
+        self.exp = experiment_class
         self.datafolder = Path(self.exp.datafolder)
 
     def folderlist_from_datafolder(self) -> list[Path]:
@@ -53,14 +52,16 @@ class CombineFiles:
 
     def combine_datasets_from_paths(self, folderlist: list[Path]) -> xr.Dataset:
         ds = self.create_empty_ds(folderlist)
-        datasets = []
+        filepath_datasets = []
+        data_datasets = []
         for p in folderlist:
             coord = self.get_coords(p)
             filepath_ds = self.get_ds_filepaths(p, coord)
-            datasets.append(filepath_ds)
+            filepath_datasets.append(filepath_ds)
             data_ds = self.get_ds_data(p, coord)
-            datasets.append(data_ds)
+            data_datasets.append(data_ds)
 
+        datasets = filepath_datasets + data_datasets
         ds = xr.combine_by_coords(datasets, combine_attrs="override")
         ds = self.cast_paths_to_str(ds)
         return ds

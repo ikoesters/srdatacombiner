@@ -8,7 +8,10 @@ from srdatacombiner.helper_scripts import xarray_tools
 from srdatacombiner.sensors.sensors import Sensors
 
 
-class ATS(Sensors):
+class SensorFish(Sensors):
+    sample_rate: int = 2048
+    filename_extension: str = ".csv"
+
     def __init__(self, filename: str | Path) -> None:
         self.filename = filename
         self.col_rename_dict = {
@@ -76,7 +79,7 @@ if __name__ == "__main__":
     import plotly.express as px
 
     filename = ""  # your filename here
-    self = ATS(filename=filename)
+    self = SensorFish(filename=filename)
     ds = self.get_xarray()
     px.line(ds.accmag)
 

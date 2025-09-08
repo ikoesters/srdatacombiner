@@ -6,6 +6,8 @@ from pathlib import Path
 
 
 class PhantomVideo:
+    filename_extension: str = ".cine"
+
     def __init__(
         self, filename: str, varname: str, return_dask_ds: bool = True
     ) -> None:
