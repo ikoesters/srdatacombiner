@@ -18,7 +18,7 @@ sp = Sensorprobe(
     sample_rate=RAPIDv1.sample_rate,
     thresh_acc_cuttoimpact=300,
     sensor_kwargs={
-        "calibration_folder": "../../../data/24_08_08_RAPIDv1_9.5mmBlade_1mpsSteps_1to10mps_30N/Calibration_T04_offboard"
+        "calibration_folder": "../../../data/24_08_08_RAPIDv1_9.5mmBlade_1mpsSteps_1to10mps_30N/T04_calibration_files"
     },
 )
 

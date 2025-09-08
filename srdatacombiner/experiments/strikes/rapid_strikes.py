@@ -19,7 +19,7 @@ sp = Sensorprobe(
     thresh_acc_cuttoimpact=300,
     sensor_kwargs={
         "calibration_folder": curr_dir
-        / "../../../data/24_08_08_RAPIDv1_9.5mmBlade_1mpsSteps_1to10mps_30N/Calibration_T04_offboard"
+        / "../../../data/24_08_08_RAPIDv1_9.5mmBlade_1mpsSteps_1to10mps_30N/T04_calibration_files"
     },
 )
 
