@@ -6,12 +6,20 @@ The package combines data from multiple sensors within a trial, such as servocon
 
 This software is not designed as a standalone package like NumPy or Pandas, where you exclusively use provided functions. Instead, it is meant to be actively worked on within the package. The package structure facilitates access to its components, as importing files across directories would otherwise be cumbersome.
 
+## Publication and data
+
 This software was used in the following publication:
 
 Kösters, W.I., Tuhtan, J.A., Efimov, D., Kruusmaa, M., Hoerner, S. (2025).
 *An open laboratory blade strike rig to evaluate the risk of injury and mortality
 to fish and to test passive sensors.* Sustainable Energy Technologies and Assessments.
 [10.1016/j.seta.2025.104427](https://doi.org/10.1016/j.seta.2025.104427)
+
+The accompanying datasets are archived on Zenodo:
+
+- CAD data of the rig — [10.5281/zenodo.15078946](https://doi.org/10.5281/zenodo.15078946)
+- Supplementary data — [10.5281/zenodo.15864852](https://doi.org/10.5281/zenodo.15864852)
+- Figure data — [10.5281/zenodo.15078903](https://doi.org/10.5281/zenodo.15078903)
 
 
 ## Installation
