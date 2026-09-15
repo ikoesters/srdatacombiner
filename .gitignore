@@ -17,5 +17,16 @@ data/*
 *.svg
 *.mp4
 *.jpg
-!program_layout.png
-!REQUIREMENTS.txt
+*.pdf
+!requirements.txt
+
+# Python build and tooling artefacts
+__pycache__/
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/

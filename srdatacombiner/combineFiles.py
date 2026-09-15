@@ -62,7 +62,12 @@ class CombineFiles:
             data_datasets.append(data_ds)
 
         datasets = filepath_datasets + data_datasets
-        ds = xr.combine_by_coords(datasets, combine_attrs="override")
+        # data_vars="all" is xarray's historical default and is stated
+        # explicitly here: the default is changing to None, which would
+        # silently alter the combined result for archived datasets.
+        ds = xr.combine_by_coords(
+            datasets, combine_attrs="override", data_vars="all"
+        )
         ds = self.cast_paths_to_str(ds)
         return ds
 

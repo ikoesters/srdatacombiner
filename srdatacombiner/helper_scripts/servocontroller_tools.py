@@ -1,6 +1,14 @@
 # %%
-# This file contains functions to convert the data from the servocontroller.
-# They are also implemented in the ServoScopePreprocessor class, but can be accessed here as well.
+# Conversions between the units of the servo drive and SI units, for use in an
+# analysis rather than during an import. The Kollmorgen reader
+# (srdatacombiner/sensors/kollmorgen.py) has rpm2ms() and pos2m() as methods,
+# since it applies them while reading a scope file, but only in that direction
+# and only on an instance built from a file. Here they are plain functions, and
+# the inverses ms2rpm() and m2pos() exist as well, so a target carriage velocity
+# or a track distance can be expressed in the units the drive reports.
+#
+# EFFECTIVE_DIAM duplicates Kollmorgen.effective_diam_pulley. Remeasuring the
+# pulley means changing both.
 import numpy as np
 import pandas as pd
 import plotly.express as px

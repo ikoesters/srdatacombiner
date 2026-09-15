@@ -69,7 +69,7 @@ if __name__ == "__main__":
     from srdatacombiner.combineFiles import CombineFiles
     from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 
-    comb = CombineFiles(BDS_Sinking)
+    comb = CombineFiles(BDS_Sinking())
     folderlist = comb.folderlist_from_datafolder()
     ds = comb.combine_datasets_from_paths(folderlist)
     # %%

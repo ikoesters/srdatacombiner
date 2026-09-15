@@ -1,4 +1,6 @@
 # %%
+from pathlib import Path
+
 import plotly.express as px
 
 from srdatacombiner.combineFiles import CombineFiles
@@ -6,12 +8,18 @@ from srdatacombiner.experiments.strikes.strikes import Scope, Sensorprobe, Strik
 from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 from srdatacombiner.sensors.sensorfish import SensorFish
 
+curr_dir = Path(__file__).parent
+
+G = 9.81  # m/s^2
+
 # Sensorprobe
 sp = Sensorprobe(
     processor=SensorFish,
     file_glob="*ms_*.csv",
     sample_rate=SensorFish.sample_rate,
-    thresh_acc_cuttoimpact=300,
+    # Strike onset threshold, above handling accelerations and below those of a
+    # 1 m/s strike. The RAPID uses the same value.
+    thresh_acc_cuttoimpact=30 * G,
 )
 
 # Scope
@@ -34,4 +42,4 @@ comb = CombineFiles(strikes)
 folderlist = comb.folderlist_from_datafolder()
 ds = comb.combine_datasets_from_paths(folderlist)
 # %%
-# save_as_h5(ds, "../../data/combined_data", comb.datafolder.name)
+save_as_h5(ds, curr_dir / "../../../data/combined_data", comb.datafolder.name)

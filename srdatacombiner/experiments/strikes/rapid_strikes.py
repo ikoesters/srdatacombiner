@@ -10,13 +10,15 @@ from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 from srdatacombiner.sensors.taltech import RAPIDv1
 
 curr_dir = Path(__file__).parent
+
+G = 9.81  # m/s^2
 # %%
 # Sensorprobe
 sp = Sensorprobe(
     processor=RAPIDv1,
     file_glob="*.txt",
     sample_rate=RAPIDv1.sample_rate,
-    thresh_acc_cuttoimpact=300,
+    thresh_acc_cuttoimpact=30 * G,  # strike onset
     sensor_kwargs={
         "calibration_folder": curr_dir
         / "../../../data/24_08_08_RAPIDv1_9.5mmBlade_1mpsSteps_1to10mps_30N/T04_calibration_files"
@@ -47,7 +49,7 @@ sp = Sensorprobe(
     processor=RAPIDv1,
     file_glob="*.txt",
     sample_rate=RAPIDv1.sample_rate,
-    thresh_acc_cuttoimpact=300,
+    thresh_acc_cuttoimpact=30 * G,  # strike onset
 )
 
 strikes_no_calib = Strikes(

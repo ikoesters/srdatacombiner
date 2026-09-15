@@ -12,6 +12,8 @@ from srdatacombiner.experiments.strikes import (
 )
 from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 
+curr_dir = Path(__file__).parent
+
 # %%
 ds_sf = sensorfish_strikes.ds
 ds_rapid = rapid_strikes.ds
@@ -30,6 +32,6 @@ ds = xr.concat([ds_sf, ds_rapid, ds_bds, ds_unsw], dim="sensor").assign_coords(
 for var in ds.data_vars:
     ds[var].attrs = {}
 # %%
-save_as_h5(ds, "../../data/combined_data/", "25_05_28_4sensors")
+save_as_h5(ds, curr_dir / "../../../data/combined_data", "25_05_28_4sensors")
 
 # %%

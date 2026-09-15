@@ -21,11 +21,18 @@ class MetricBase:
         )
         self.da_peaks: xr.DataArray = self.da_res.copy()
 
-        self.savepath: Path = Path("figs")
-        self.savepath.mkdir(parents=True, exist_ok=True)
+        # Not created here: constructing a metric must not touch the filesystem.
+        # figure_path() creates it, immediately before a figure is written.
+        self.figdir: Path = Path("figs")
 
+        self.figname: str
         self.metric_label: str
         self.offset_indices: np.ndarray
+
+    def figure_path(self) -> Path:
+        """Where this metric's figure goes, with ``figdir`` created if missing."""
+        self.figdir.mkdir(parents=True, exist_ok=True)
+        return self.figdir / self.figname
 
     def calculate(self) -> None:
         for v in self.ds.strvel:
@@ -117,7 +124,7 @@ class MetricBase:
 
         ax.legend(frameon=True)
         fig.tight_layout()
-        # fig.savefig(self.savepath, dpi=300)
+        # fig.savefig(self.figure_path(), dpi=300)
         return fig, ax
 
     def plot_conf_range(self) -> tuple[plt.Figure, plt.Axes]:

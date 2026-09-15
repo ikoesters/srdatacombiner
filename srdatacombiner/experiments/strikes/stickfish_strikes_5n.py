@@ -18,11 +18,6 @@ sp = Sensorprobe(
 )
 
 
-def find_impact_idx(ds: xr.Dataset) -> int:
-    idx_impact = (ds.accmag2 > sp.thresh_acc_cuttoimpact).argmax("time").item()
-    return idx_impact
-
-
 def find_impact_idx(ds: xr.Dataset) -> (int, int):
     std = ds["accz2"].isel(time=range(0, 1000)).std("time")
     mean = ds["accz2"].isel(time=range(0, 1000)).mean("time")

@@ -1,0 +1,33 @@
+# Exact package versions of the environment used for the strike analysis,
+# installable with the standard library venv and pip on any platform.
+#
+# Use this file only to reproduce the archived results. The normal way to work
+# with the package is an editable install (pip install -e .), which is what the
+# README describes and which takes current versions of the same dependencies.
+#
+# Python 3.11.5 was used, and these pins require it. Install with:
+#
+#     python3.11 -m venv .venv
+#     source .venv/bin/activate
+#     pip install -r requirements.txt
+#     pip install -e . --no-deps
+
+# Runtime
+xarray==2024.2.0
+numpy==1.26.2
+pandas==2.1.1
+scipy==1.11.4
+matplotlib==3.8.0
+plotly==5.9.0
+h5netcdf==1.2.0
+h5py==3.9.0
+
+# Figure scripts
+seaborn==0.13.2
+
+# Optional extras
+# sensors/phantom_video.py, reading *.cine high-speed video
+pims==0.6.1
+dask==2024.2.0
+# sensors/taltech.py, BDS100 absolute orientation
+numpy-quaternion==2022.4.3

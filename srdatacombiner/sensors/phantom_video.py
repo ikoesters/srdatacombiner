@@ -59,14 +59,24 @@ class PhantomVideo:
         return da
 
 
-class DualVideo(PhantomVideo):
+class DualVideo:
+    """The two camera views of one trial, composed into a single Dataset.
+
+    Composes two :class:`PhantomVideo` readers rather than subclassing one,
+    since a trial is a pair of recordings and not itself a recording.
+    """
+
     def __init__(self, filename: str | Path) -> None:
-        if isinstance(filename, str):
-            filename = Path(filename)
-        filename_below = filename.name.replace("CamSide", "CamBelow")
-        filename_side = filename.name.replace("CamBelow", "CamSide")
-        self.camb = super(filename_below, varname="cam_below")
-        self.cams = super(filename_side, varname="cam_side")
+        filename = Path(filename)
+        # Keep the directory: only the view name in the stem differs.
+        filename_below = filename.with_name(
+            filename.name.replace("CamSide", "CamBelow")
+        )
+        filename_side = filename.with_name(
+            filename.name.replace("CamBelow", "CamSide")
+        )
+        self.camb = PhantomVideo(filename_below, varname="cam_below")
+        self.cams = PhantomVideo(filename_side, varname="cam_side")
 
         self.camb.xname = "xb"
         self.camb.yname = "yb"

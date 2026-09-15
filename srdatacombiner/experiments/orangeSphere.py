@@ -10,7 +10,7 @@ from srdatacombiner.sensors.kollmorgen import Kollmorgen
 from srdatacombiner.sensors.taltech import Microtag
 
 
-class UNSW_Strikes(Experiments):
+class OrangeSphere_Strikes(Experiments):
     def __init__(self) -> None:
         self.datafolder = (
             "../../data/25_04_03_OrangeSphere_9.5mmBlade_1to10mps_1mpsSteps_3N"
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     from srdatacombiner.combineFiles import CombineFiles
     from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 
-    comb = CombineFiles(UNSW_Strikes())
+    comb = CombineFiles(OrangeSphere_Strikes())
     folderlist = comb.folderlist_from_datafolder()
     ds = comb.combine_datasets_from_paths(folderlist)
     # %%

@@ -61,7 +61,7 @@ def set_attr_timestamp(
 
 def save_as_h5(
     ds: xr.Dataset | xr.DataArray,
-    folder: str,
+    folder: str | Path,
     filename: str | Path,
     compress: bool = True,
     compress_level=1,
@@ -73,8 +73,10 @@ def save_as_h5(
         encoding = {var: comp for var in ds.data_vars}
     else:
         encoding = {}
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=True)
     ds.to_netcdf(
-        Path(folder) / f"{filename}.h5",
+        folder / f"{filename}.h5",
         engine="h5netcdf",
         format="NETCDF4",
         encoding=encoding,

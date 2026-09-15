@@ -1,10 +1,14 @@
 # %%
+from pathlib import Path
+
 import plotly.express as px
 
 from srdatacombiner.combineFiles import CombineFiles
 from srdatacombiner.experiments.strikes.strikes import Scope, Sensorprobe, Strikes
 from srdatacombiner.helper_scripts.xarray_tools import save_as_h5
 from srdatacombiner.sensors.taltech import BDS250
+
+curr_dir = Path(__file__).parent
 
 resample_rate = 2000
 # Sensorprobe
@@ -36,4 +40,4 @@ comb = CombineFiles(strikes)
 folderlist = comb.folderlist_from_datafolder()
 ds = comb.combine_datasets_from_paths(folderlist)
 # %%
-# save_as_h5(ds, "../../data/combined_data", comb.datafolder.name)
+save_as_h5(ds, curr_dir / "../../../data/combined_data", comb.datafolder.name)

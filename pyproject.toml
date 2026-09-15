@@ -1,0 +1,52 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "srdatacombiner"
+version = "1.0.0"
+description = "Combine multi-sensor blade strike rig measurements into a single labelled dataset"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Wolf Iring Kösters", email = "wolf.koesters@ovgu.de" }]
+keywords = [
+    "fish passage",
+    "blade strike",
+    "hydropower",
+    "sensor probe",
+    "xarray",
+]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering",
+]
+
+dependencies = [
+    "xarray>=2024.2",
+    "numpy>=1.26",
+    "pandas>=2.1",
+    "scipy>=1.11",
+    "matplotlib>=3.8",
+    "plotly>=5.9",
+    "h5netcdf>=1.2",
+    # h5netcdf needs h5py as its backend to read and write the .h5 datasets.
+    "h5py>=3.9",
+]
+
+[project.optional-dependencies]
+# sensors/phantom_video.py only: reading *.cine high-speed video.
+video = ["pims>=0.6", "dask[array]>=2024.2"]
+# sensors/taltech.py BDS100._absolute_orientation() only.
+orientation = ["numpy-quaternion>=2022.4"]
+
+[project.urls]
+Repository = "https://github.com/ikoesters/srdatacombiner"
+
+[tool.hatch.build.targets.wheel]
+packages = ["srdatacombiner"]
+
+[tool.hatch.build.targets.sdist]
+include = ["srdatacombiner", "README.md", "LICENSE"]

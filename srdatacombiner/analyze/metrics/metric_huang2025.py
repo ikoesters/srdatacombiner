@@ -7,6 +7,10 @@ import xarray as xr
 from scipy.signal import find_peaks
 
 from srdatacombiner.analyze.metrics.metric_base import MetricBase
+from srdatacombiner.analyze.metrics.metric_peak_accmag import (
+    G,
+    MORTALITY_THRESHOLD_G,
+)
 
 
 class MvMetricHuang2025(MetricBase):
@@ -14,12 +18,14 @@ class MvMetricHuang2025(MetricBase):
         super().__init__(ds)
 
         self.offset_indices: np.ndarray = np.array(range(-3, 3 + 1))
-        self.peak_height: float = 950.1  # m/s^2
+        # The 95 g event threshold of Deng et al. (2010), the same value the
+        # peak acceleration magnitude metric uses.
+        self.peak_height: float = MORTALITY_THRESHOLD_G * G  # m/s^2
         self.peak_distance: int = 7
 
         self.delta_t: float = np.mean(np.gradient(ds.time))
 
-        self.savepath: Path = self.savepath / "acc_metric.pdf"
+        self.figname: str = "acc_metric.pdf"
         self.metric_label: str = "Huang2025 Mv Metric"
 
     def calculate_metric(self, ds: xr.Dataset) -> np.ndarray:
@@ -70,7 +76,7 @@ class MpMetricHuang2025(MetricBase):
         self.rho_h20: float = 998  # kg/m^3
         self.mbar_to_pa: float = 100  # Pa/mBar
 
-        self.savepath: Path = self.savepath / "pres_metric.pdf"
+        self.figname: str = "pres_metric.pdf"
         self.metric_label: str = "Huang2025 Mp Metric"
 
     def find_peak(self, ds: xr.Dataset) -> int:
@@ -125,7 +131,7 @@ class MetricHuang2025(MetricBase):
         self.mv = MvMetricHuang2025(ds)
         self.ds = ds
 
-        self.savepath: Path = self.savepath / "huang2025_metrics.pdf"
+        self.figname: str = "huang2025_metrics.pdf"
         self.metric_label: str = "Huang2025 Metrics"
 
     def calculate(self):
@@ -136,23 +142,22 @@ class MetricHuang2025(MetricBase):
 
 # %%
 if __name__ == "__main__":
-    import plotly.express as px
+    data_dir = Path(__file__).parents[3] / "data" / "combined_data"
 
     ds = xr.open_dataset(
-        "/home/iring/Projects/bds_data_assimilation/srdatacombiner/data/combined_data/24_07_26_ATS_9.5mmBlade_1mpsSteps_1to8mps_30N.h5"
+        data_dir / "24_07_26_ATS_9.5mmBlade_1mpsSteps_1to8mps_30N.h5"
     )
-    self = MetricHuang2025(ds)
-    self.calculate()
-    # %%
-    fig, ax = mv.plot()
-    fig.savefig("figs/huang2025_mv_metric.png", dpi=300)
-    # %%
-    peaks = mv.results.peaks
-    mp = MpMetricHuang2025(ds, peaks)
-    mp.calculate()
-    fig, ax = mp.plot()
-    fig.savefig("figs/huang2025_mp_metric.png", dpi=300)
+    metrics = MetricHuang2025(ds)
+    metrics.calculate()
 
     # %%
-    mv.results.metric.std("trial").plot()
-    print(mv.results.metric.std("trial").mean())
+    fig, ax = metrics.mv.plot()
+    fig.savefig(metrics.mv.figure_path(), dpi=300)
+
+    # %%
+    fig, ax = metrics.mp.plot()
+    fig.savefig(metrics.mp.figure_path(), dpi=300)
+
+    # %%
+    metrics.mv.results.metric.std("trial").plot()
+    print(metrics.mv.results.metric.std("trial").mean())
